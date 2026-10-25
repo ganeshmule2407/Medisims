@@ -1,26 +1,22 @@
 package com.example.midisims.controller;
 
-import com.example.midisims.dto.CreatePharmacyRequest;
-import com.example.midisims.model.Pharmacy;
+import com.example.midisims.dto.LoginPharmacyRequest;
+import com.example.midisims.dto.RegisterPharmacyRequest;
+import com.example.midisims.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import com.example.midisims.repository.PharmacyRepository;
 
 @RestController
-@RequestMapping("/start")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
-
     @Autowired
-    PharmacyRepository pharmacyRepository;
-
-    @PostMapping("/createPharmacy")
-    public String createPharmacy(@RequestBody CreatePharmacyRequest request){
-            Pharmacy pharmacy = new Pharmacy();
-            pharmacy.setPharmacyName(request.getPharmacyName());
-            pharmacyRepository.save(pharmacy);
-            return "Pharmacy Created Successfully";
+    AuthService service;
+    @PostMapping("/register")
+    public String register(@RequestBody RegisterPharmacyRequest request){
+        return service.register(request);
     }
-
+    @PostMapping("/login")
+    public String login(@RequestBody LoginPharmacyRequest request){return service.login(request);}
     @GetMapping("/test")
     public String test() {
         return "Controller is working";

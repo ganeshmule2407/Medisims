@@ -1,9 +1,6 @@
 package com.example.midisims.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,10 +15,12 @@ import java.time.LocalDate;
 @Entity
 public class Batch {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "batch_id")
     private Long batchId;
     private String batchNumber;
     @ManyToOne
+    @JoinColumn(name = "inventory_id")
     private Inventory inventory;
     private LocalDate expiry;
     private Long totalQuantity;

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-@Component
 public class ManualAddStockResponse {
     private String msg;
     private String medicineName;

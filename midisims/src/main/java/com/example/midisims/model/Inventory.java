@@ -1,9 +1,6 @@
 package com.example.midisims.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,11 +13,14 @@ import lombok.Setter;
 @Entity
 public class Inventory {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "inventory_id")
     private Long inventoryId;
     @ManyToOne
+    @JoinColumn(name = "medicine_id")
     private Medicine medicine;
     @ManyToOne
+    @JoinColumn(name = "pharmacy_id")
     private Pharmacy pharmacy;
     private Long totalQuantity;
 }

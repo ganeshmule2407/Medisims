@@ -1,7 +1,6 @@
 package com.example.midisims.service;
 
-import com.example.midisims.dto.ManualAddStockRequest;
-import com.example.midisims.dto.ManualAddStockResponse;
+import com.example.midisims.dto.*;
 import com.example.midisims.model.Batch;
 import com.example.midisims.model.Inventory;
 import com.example.midisims.model.Medicine;
@@ -13,6 +12,8 @@ import com.example.midisims.repository.InventoryRepository;
 import com.example.midisims.repository.MedicineRepository;
 import com.example.midisims.repository.PharmacyRepository;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 @Service
 public class InventoryService {
@@ -24,29 +25,21 @@ public class InventoryService {
     BatchRepository batchRepository;
     @Autowired
     MedicineRepository medicineRepository;
-    @Autowired
-    ManualAddStockResponse manualAddStockResponse;
 
     public ManualAddStockResponse addStockManual(ManualAddStockRequest request,Long pharmacyId) {
-        Medicine medicine;
         Inventory inventory;
         Batch batch;
-        //Find Pharmacy
-        Pharmacy pharmacy=pharmacyRepository.findByPharmacyId(pharmacyId);
+
+        Pharmacy pharmacy=pharmacyRepository.findByPharmacyId(pharmacyId);//Find Pharmacy
         if(pharmacy==null)throw new RuntimeException("Pharmacy Not found");
-        //Find Medicine
+
         Optional<Medicine>existingMedicine=medicineRepository.findByMedicineNameAndStrength(
                 request.getMedicineName(),
                 request.getStrength()
         );
 
-        medicine = existingMedicine.orElseGet(() -> createMedicine(request));
-//        if(existingMedicine.isPresent()){  as same as above line
-//            medicine= existingMedicine.get();
-//        }else{
-//            medicine=createMedicine(request);
-//        }
-        //Find Inventory
+        Medicine medicine = existingMedicine.orElseGet(() -> createMedicine(request));   //Find Inventory
+
         Optional<Inventory>existingInventory=inventoryRepository.findByPharmacy_PharmacyIdAndMedicine_MedicineId(
                 pharmacyId,
                 medicine.getMedicineId()
@@ -60,8 +53,7 @@ public class InventoryService {
         }
         else inventory=createInventory(request,medicine,pharmacyId);
 
-        //Find Batch
-        Optional<Batch>existingBatch=batchRepository.findByInventory_InventoryIdAndBatchNumber(
+        Optional<Batch>existingBatch=batchRepository.findByInventory_InventoryIdAndBatchNumber(//Find Batch
                 inventory.getInventoryId(),
                 request.getBatchNumber()
         );
@@ -74,12 +66,33 @@ public class InventoryService {
         }
         else batch=createBatch(request,inventory);
 
-        manualAddStockResponse.setBatchNumber(batch.getBatchNumber());
-        manualAddStockResponse.setMedicineName(medicine.getMedicineName());
-        manualAddStockResponse.setTotalQuantity(inventory.getTotalQuantity());
-        manualAddStockResponse.setMsg("Stock added successfully");
-        manualAddStockResponse.setQuantityAdded(request.getQuantity());
-        return manualAddStockResponse;
+        return new ManualAddStockResponse(
+                "Stock added successfully",
+                medicine.getMedicineName(),
+                batch.getBatchNumber(),
+                request.getQuantity(),
+                inventory.getTotalQuantity());
+    }
+
+    public SearchMedicineResponse searchMedicine(SearchMedicineRequest request) {
+        List<PharmacyStockDTO> pharmacies=new ArrayList<>();
+         Optional<Medicine> medicine= medicineRepository.findByMedicineNameAndStrength(request.getMedicineName(), request.getStrength());
+         if(medicine.isEmpty()){
+             return new SearchMedicineResponse(request.getMedicineName(), "Medicine Not Found",pharmacies);
+         }
+         List<Inventory> inventories = inventoryRepository.findByMedicine_MedicineIdAndTotalQuantityGreaterThan(medicine.get().getMedicineId(), 0);
+         if(inventories.isEmpty()){
+             return new SearchMedicineResponse(request.getMedicineName(),"Medicine Not Available",pharmacies);
+         }
+         for(Inventory inventory : inventories){
+             String pharmacyName=inventory.getPharmacy().getPharmacyName();
+             pharmacies.add(new PharmacyStockDTO(pharmacyName,inventory.getTotalQuantity()));
+         }
+         return new SearchMedicineResponse(
+                 request.getMedicineName(),
+                 "stock found",
+                 pharmacies
+         );
     }
 
     public Medicine createMedicine(ManualAddStockRequest request){

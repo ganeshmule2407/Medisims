@@ -7,8 +7,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class CreatePharmacyRequest {
-    private String pharmacyName;
+@NoArgsConstructor
+public class SearchMedicineRequest {
+    String medicineName;
+    String strength;
 }

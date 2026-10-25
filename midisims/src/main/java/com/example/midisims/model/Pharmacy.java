@@ -1,12 +1,11 @@
 package com.example.midisims.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.factory.parsing.Location;
 
 @Getter
 @Setter
@@ -15,7 +14,9 @@ import lombok.Setter;
 @Entity
 public class Pharmacy {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "pharmacy_id")
     private Long pharmacyId;
     private String pharmacyName;
+    private String location;
 }
